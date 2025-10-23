@@ -31,6 +31,7 @@ const TopBar = ({
 }) => {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showAutocomplete, setShowAutocomplete] = useState(false)
+  const searchContainerRef = useRef(null)
   const [suggestions] = useState([
     { text: 'Machine Learning in Healthcare', icon: Zap, category: 'AI' },
     { text: 'Computer Vision Applications', icon: Globe, category: 'CV' },
@@ -62,7 +63,7 @@ const TopBar = ({
   // Close autocomplete when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
         setShowAutocomplete(false)
       }
     }
@@ -77,6 +78,7 @@ const TopBar = ({
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }}
     >
       <div className="top-bar-content">
         {/* Logo/Brand */}
@@ -103,7 +105,7 @@ const TopBar = ({
         </motion.div>
 
         {/* Search Container */}
-        <div className="search-container" ref={searchInputRef}>
+        <div className="search-container" ref={searchContainerRef} style={{ position: 'relative' }}>
           <form onSubmit={handleSearchSubmit} className="search-form">
             <div className="search-input-wrapper">
               <Search size={20} className="search-icon" />
@@ -138,14 +140,23 @@ const TopBar = ({
             </div>
           </form>
 
-          {/* Autocomplete */}
+          {/* Autocomplete - Positioned Absolutely */}
           <AnimatePresence>
             {showAutocomplete && (
-              <SearchAutocomplete
-                query={searchQuery}
-                suggestions={suggestions}
-                onSelect={handleSuggestionSelect}
-              />
+              <div style={{ 
+                position: 'absolute', 
+                top: '100%', 
+                left: 0, 
+                right: 0, 
+                zIndex: 1000,
+                marginTop: '8px'
+              }}>
+                <SearchAutocomplete
+                  query={searchQuery}
+                  suggestions={suggestions}
+                  onSelect={handleSuggestionSelect}
+                />
+              </div>
             )}
           </AnimatePresence>
         </div>
