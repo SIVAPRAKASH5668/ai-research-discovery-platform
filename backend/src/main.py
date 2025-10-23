@@ -42,42 +42,32 @@ try:
     TRANSLATION_AVAILABLE = True
 except ImportError:
     TRANSLATION_AVAILABLE = False
-    print("âš ï¸  Translation unavailable. Install: pip install deep-translator")
+    print("⚠️ Translation unavailable. Install: pip install deep-translator")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Import components
+# Import all components
 try:
-    from database.elastic_client import ElasticClient
-    from core.vertex_ai_processor import VertexAIProcessor
-    from core.hybrid_search_engine import HybridSearchEngine
-    from core.graph_builder import EnhancedIntelligentGraphBuilder
-    from integrations.research_paper_apis import ResearchPaperAPIsClient
-    
+    from src.database.elastic_client import ElasticClient
+    from src.core.vertex_ai_processor import VertexAIProcessor
+    from src.core.hybrid_search_engine import HybridSearchEngine
+    from src.core.graph_builder import EnhancedIntelligentGraphBuilder
+    from src.integrations.research_paper_apis import ResearchPaperAPIsClient
     from src.middleware.translation_middleware import auto_translate
-
-
-    logger.info("âœ… All components imported successfully")
+    
+    logger.info("✅ All components imported successfully")
     COMPONENTS_OK = True
 except ImportError as e:
-    logger.error(f"âŒ Component import failed: {e}")
+    logger.error(f"❌ Component import failed: {e}")
     COMPONENTS_OK = False
-
-from elasticsearch import Elasticsearch
-
-ELASTIC_ENDPOINT = os.getenv('ELASTIC_ENDPOINT')
-ELASTIC_API_KEY = os.getenv('ELASTIC_API_KEY')
-ES_INDEX = os.getenv('ELASTIC_INDEX_NAME', 'research')
-
-logger.info("ðŸ”§ Initializing Elasticsearch Client for Cloud Endpoints...")
-
-try:
-    es = Elasticsearch(
-        ELASTIC_ENDPOINT,
-        api_key=ELASTIC_API_KEY,
-        verify_certs=True,
-        request_timeout=30
+    
+    # Fallback decorator
+    def auto_translate(func):
+        """Fallback when translation unavailable"""
+        return func
+    
+    logger.warning("⚠️ Using fallback mode - some features disabled")
     )
     
     es_info = es.info()
@@ -1775,4 +1765,5 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
+
 
