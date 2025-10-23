@@ -1,28 +1,8 @@
-# Virtual environments
 myenv/
 venv/
-env/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-.pytest_cache/
-
-# Environment files
 .env
-*.env
 backend/.env
 frontend/.env
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Google Cloud
+__pycache__/
+*.pyc
 gcp-key.json
-*-credentials.json
