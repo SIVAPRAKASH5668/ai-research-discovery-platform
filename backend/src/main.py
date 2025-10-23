@@ -37,6 +37,7 @@ import uvicorn
 import httpx
 
 # Translation support
+# Translation support
 try:
     from deep_translator import GoogleTranslator
     TRANSLATION_AVAILABLE = True
@@ -47,7 +48,7 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Import all components
+# Import all components with fallback
 try:
     from src.database.elastic_client import ElasticClient
     from src.core.vertex_ai_processor import VertexAIProcessor
@@ -62,21 +63,41 @@ except ImportError as e:
     logger.error(f"❌ Component import failed: {e}")
     COMPONENTS_OK = False
     
-    # Fallback decorator
+    # Create fallback decorator if import fails
     def auto_translate(func):
-        """Fallback when translation unavailable"""
+        """Fallback decorator when translation middleware unavailable"""
         return func
     
     logger.warning("⚠️ Using fallback mode - some features disabled")
+
+# Elasticsearch initialization
+from elasticsearch import Elasticsearch
+
+ELASTIC_ENDPOINT = os.getenv('ELASTIC_ENDPOINT')
+ELASTIC_API_KEY = os.getenv('ELASTIC_API_KEY')
+ES_INDEX = os.getenv('ELASTIC_INDEX_NAME', 'research')
+
+logger.info("🔧 Initializing Elasticsearch Client...")
+
+try:
+    es = Elasticsearch(
+        ELASTIC_ENDPOINT,
+        api_key=ELASTIC_API_KEY,
+        verify_certs=True,
+        request_timeout=30
     )
     
+    # Test connection
     es_info = es.info()
-    logger.info(f"âœ… Elasticsearch connected: {ELASTIC_ENDPOINT}")
-    logger.info(f"âœ… Using index: {ES_INDEX}")
+    logger.info(f"✅ Elasticsearch connected: {ELASTIC_ENDPOINT}")
+    logger.info(f"✅ Using index: {ES_INDEX}")
+    logger.info(f"✅ ES Cluster: {es_info.get('cluster_name', 'unknown')}")
     
 except Exception as e:
-    logger.error(f"âŒ Elasticsearch initialization failed: {e}")
+    logger.error(f"❌ Elasticsearch initialization failed: {e}")
+    logger.warning("⚠️ Application will run without Elasticsearch")
     es = None
+
 # ============================================================================
 # PYDANTIC MODELS
 # ============================================================================
@@ -1765,5 +1786,6 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
+
 
 
