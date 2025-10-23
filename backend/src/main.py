@@ -11,9 +11,9 @@ CONVERSATIONAL MULTILINGUAL RESEARCH DISCOVERY WITH VERTEX AI GEMINI + RAG
 - Knowledge graph visualization
 - Real-time edge calculation
 
-Author: Sivaprakash
+
 Hackathon: Elastic + Google Cloud 2025
-Version: 7.0.0-RAG
+
 """
 
 import asyncio
@@ -55,7 +55,7 @@ try:
     from core.graph_builder import EnhancedIntelligentGraphBuilder
     from integrations.research_paper_apis import ResearchPaperAPIsClient
     
-    from middleware.translation_middleware import auto_translate
+    from src.middleware.translation_middleware import auto_translate
 
 
     logger.info("âœ… All components imported successfully")
@@ -1775,3 +1775,4 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
+
