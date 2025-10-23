@@ -116,19 +116,34 @@ const SearchInterface = ({
               Connections
             </h1>
 
-            {/* Description */}
-            <p style={{
-              fontSize: '20px',
-              lineHeight: '1.7',
-              color: 'rgba(255, 255, 255, 0.95)',
-              maxWidth: '750px',
-              margin: '0 auto',
-              textShadow: '0 4px 25px rgba(0, 0, 0, 1)',
-              fontWeight: '400'
-            }}>
-              Explore the interconnected world of scientific research with AI-powered discovery.
-              Uncover hidden patterns, relationships, and insights across millions of papers.
-            </p>
+            {/* Description - First Paragraph */}
+<p style={{
+  fontSize: '20px',
+  lineHeight: '1.7',
+  color: 'rgba(255, 255, 255, 0.95)',
+  maxWidth: '920px',  // ✅ Increased from 820px
+  margin: '0 auto 15px',
+  textShadow: '0 4px 25px rgba(0, 0, 0, 1)',
+  fontWeight: '400'
+}}>
+  Revolutionize scientific research with Elastic's hybrid search and Google Cloud Vertex AI.
+</p>
+
+{/* Description - Second Paragraph */}
+<p style={{
+  fontSize: '18px',
+  lineHeight: '1.7',
+  color: 'rgba(255, 255, 255, 0.88)',
+  maxWidth: '920px',  // ✅ Increased from 820px
+  margin: '0 auto',
+  textShadow: '0 4px 25px rgba(0, 0, 0, 1)',
+  fontWeight: '400'
+}}>
+  Harness Gemini's generative AI to discover hidden patterns, knowledge networks, and breakthrough 
+  insights across millions of papers through intelligent, conversational exploration.
+</p>
+
+
           </motion.div>
 
           {/* Neural Network Background */}
