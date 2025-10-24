@@ -171,48 +171,59 @@ npm run dev
 - **API Docs**: http://localhost:8000/docs
 
 ---
-
-## 📁 Project Structure
 ```
 researchmind-ai/
-├── src/
-│   ├── main.py                      # FastAPI application entry point
-│   ├── api/
-│   │   ├── chat.py                  # Conversational AI endpoints
-│   │   ├── search.py                # Hybrid search endpoints
-│   │   └── graph.py                 # Knowledge graph endpoints
-│   ├── services/
-│   │   ├── elastic_service.py       # Elasticsearch integration
-│   │   ├── gemini_service.py        # Google Gemini integration
-│   │   ├── vertex_service.py        # Vertex AI embeddings/translation
-│   │   └── research_apis.py         # Crossref/Semantic Scholar/arXiv/PubMed/Europe PMC/DOAJ
-│   ├── models/
-│   │   └── schemas.py               # Pydantic data models
-│   └── utils/
-│       ├── caching.py               # Response caching layer
-│       └── rate_limiter.py          # API rate limiting
+├── backend/
+│   ├── src/
+│   │   ├── main.py                          # FastAPI application entry + all endpoints
+│   │   ├── core/
+│   │   │   ├── elastic_client.py            # Elasticsearch Serverless (hybrid search)
+│   │   │   ├── gemini_service.py            # Google Gemini 1.5 Pro (RAG + conversation)
+│   │   │   ├── vertex_ai_service.py         # Vertex AI (embeddings + translation)
+│   │   │   └── research_apis.py             # Crossref/Semantic Scholar/arXiv/PubMed
+│   │   ├── models/
+│   │   │   └── schemas.py                   # Pydantic request/response models
+│   │   └── utils/
+│   │       ├── text_processing.py           # Text cleaning, chunking
+│   │       └── language_utils.py            # Language detection, formatting
+│   ├── requirements.txt                     # Python dependencies
+│   ├── Dockerfile                           # Backend container
+│   └── .env.example                         # Environment variables template
+│
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx                  # Main React component
+│   │   ├── App.jsx                          # Main React app component
+│   │   ├── main.jsx                         # Vite entry point
 │   │   ├── components/
-│   │   │   ├── ChatInterface.jsx
-│   │   │   ├── SearchResults.jsx
-│   │   │   └── KnowledgeGraph.jsx
+│   │   │   ├── SearchInterface.jsx          # Hero + search UI
+│   │   │   ├── ChatInterface.jsx            # Conversational query UI
+│   │   │   ├── SearchResults.jsx            # Paper results display
+│   │   │   ├── GraphViewer.jsx              # Knowledge graph visualization
+│   │   │   ├── NodeInspector.jsx            # Paper detail panel
+│   │   │   └── LanguageSwitcher.jsx         # Multilingual UI toggle
+│   │   ├── hooks/
+│   │   │   ├── useResearchData.js           # API data fetching
+│   │   │   └── useGraphVisualization.js     # Graph state management
+│   │   ├── styles/
+│   │   │   ├── modern.css                   # Main styles
+│   │   │   └── animations.css               # UI animations
 │   │   └── utils/
-│   │       └── api.js               # API client
-│   └── package.json
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── conftest.py
-├── requirements.txt                 # Python dependencies
-├── Dockerfile                       # Container configuration
-├── docker-compose.yml               # Local development stack
+│   │       ├── api.js                       # Backend API client
+│   │       └── constants.js                 # App constants
+│   ├── package.json                         # Node dependencies
+│   ├── vite.config.js                       # Vite configuration
+│   └── Dockerfile                           # Frontend container
+│
+├── docs/
+│   ├── ARCHITECTURE.md                      # System design documentation
+│   ├── API.md                               # API endpoint documentation
+├── LICENSE                                  # MIT License
+├── README.md                                # Project overview + setup
+└── .gitignore                               # Git ignore rules
 ├── .env.example                     # Environment variables template
 └── README.md
 ```
 
----
 
 ## 🔧 Configuration
 
