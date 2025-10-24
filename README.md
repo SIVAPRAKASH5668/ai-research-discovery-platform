@@ -39,7 +39,7 @@
 - **Sub-200ms Query Latency** - Distributed Elasticsearch architecture
 
 ### 🤖 Google Cloud Conversational AI
-- **Gemini 1.5 Pro** - Natural language understanding with 128K context window
+- **Gemini 2.5 Flash Lite ** - Natural language understanding with 128K context window
 - **Vertex AI Embeddings** - Multilingual semantic vectors for cross-language discovery
 - **RAG Architecture** - Zero-hallucination guarantee with citation validation
 - **Multi-turn Dialogue** - Context-aware conversation memory
@@ -69,7 +69,7 @@
 ### Search & AI
 - **Elasticsearch Cloud** - Distributed hybrid search engine (BM25 + kNN)
 - **Google Cloud Vertex AI** - Multilingual embeddings and translation
-- **Google Gemini 1.5 Pro** - Conversational AI with RAG
+- **Google Gemini 2.5 Flash-lite ** - Conversational AI with RAG
 - **Sentence Transformers** - Embedding model integration
 
 ### Frontend
@@ -231,6 +231,8 @@ ELASTICSEARCH_API_KEY=your-elasticsearch-api-key
 ELASTICSEARCH_INDEX_NAME=research_papers
 
 # Research APIs
+Free Endpoints available  !!
+IF Not!!
 CROSSREF_EMAIL=your-email@example.com
 SEMANTIC_SCHOLAR_API_KEY=optional-but-recommended
 PUBMED_API_KEY=optional-for-higher-rate-limits
@@ -462,27 +464,12 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 **Submission Date:** [Date]
 
-### Why ResearchMind AI Wins
-✅ **Perfect Integration**: Seamlessly combines Elastic's hybrid search with Google Cloud's AI  
-✅ **Real-World Impact**: Solves actual research discovery problems  
-✅ **Technical Excellence**: Production-grade architecture with 92% accuracy  
-✅ **Innovation**: First multilingual conversational research platform  
-✅ **Scalability**: Handles millions of papers with sub-2s response times  
-
 ---
 
-## 📧 Contact & Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/researchmind-ai/issues)
-- **Email**: your-email@example.com
-- **Twitter**: [@yourhandle](https://twitter.com/yourhandle)
-- **Documentation**: [Full Docs](https://docs.researchmind-ai.com)
-
----
 
 ## 🙏 Acknowledgments
 
-- **Google Cloud** - Vertex AI and Gemini 1.5 Pro infrastructure
+- **Google Cloud** - Vertex AI and Gemini 2.5 Flash infrastructure
 - **Elastic** - Elasticsearch hybrid search capabilities
 - **Research Data Providers** - arXiv, Crossref, Semantic Scholar, PubMed, Europe PMC, DOAJ
 - **FastAPI Community** - Excellent framework and documentation
