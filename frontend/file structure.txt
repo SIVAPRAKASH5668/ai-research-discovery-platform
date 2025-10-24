@@ -1,3 +1,4 @@
+frontend
 src/
 ├── components/
 │   ├── common/
@@ -17,6 +18,8 @@ src/
 │   ├── search/
 │   │   ├── SearchInterface.jsx
 │   │   └── SearchAutocomplete.jsx
+│   └── translation/
+│   │   ├── LanguageSwitcher.jsx
 │   └── ui/
 │       ├── Button.jsx
 │       ├── Badge.jsx
