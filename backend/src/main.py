@@ -1,8 +1,8 @@
 """
-ðŸ† ELASTIC + GOOGLE CLOUD HACKATHON SUBMISSION
+🏆 ELASTIC + GOOGLE CLOUD HACKATHON SUBMISSION
 CONVERSATIONAL MULTILINGUAL RESEARCH DISCOVERY WITH VERTEX AI GEMINI + RAG
 
-âœ… FEATURES:
+✅ FEATURES:
 - Conversational AI with Vertex AI Gemini
 - Multilingual research discovery
 - User library (save papers)
@@ -30,13 +30,12 @@ from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI,Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import uvicorn
 import httpx
 
-# Translation support
 # Translation support
 try:
     from deep_translator import GoogleTranslator
@@ -48,19 +47,21 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Import all components with fallback
+# ✅ FIXED IMPORTS - Use relative imports since main.py is inside src/
 try:
-    from src.database.elastic_client import ElasticClient
-    from src.core.vertex_ai_processor import VertexAIProcessor
-    from src.core.hybrid_search_engine import HybridSearchEngine
-    from src.core.graph_builder import EnhancedIntelligentGraphBuilder
-    from src.integrations.research_paper_apis import ResearchPaperAPIsClient
-    from src.middleware.translation_middleware import auto_translate
+    from database.elastic_client import ElasticClient
+    from core.vertex_ai_processor import VertexAIProcessor
+    from core.hybrid_search_engine import HybridSearchEngine
+    from core.graph_builder import EnhancedIntelligentGraphBuilder
+    from integrations.research_paper_apis import ResearchPaperAPIsClient
+    from middleware.translation_middleware import auto_translate
     
     logger.info("✅ All components imported successfully")
     COMPONENTS_OK = True
 except ImportError as e:
     logger.error(f"❌ Component import failed: {e}")
+    logger.error(f"Current working directory: {os.getcwd()}")
+    logger.error(f"Python path: {os.sys.path}")
     COMPONENTS_OK = False
     
     # Create fallback decorator if import fails
@@ -133,7 +134,7 @@ class PaperQuestionRequest(BaseModel):
     question: str
 
 
-# âœ… NEW: User Library Models
+# ✅ NEW: User Library Models
 class SavePaperRequest(BaseModel):
     user_id: str
     paper_id: str
@@ -148,7 +149,7 @@ class RAGQueryRequest(BaseModel):
 
 
 # ============================================================================
-# ðŸ§  VERTEX AI GEMINI INTELLIGENT AGENT
+# 🧠 VERTEX AI GEMINI INTELLIGENT AGENT
 # ============================================================================
 
 async def _intelligent_agent_with_vertex_ai(
@@ -157,7 +158,7 @@ async def _intelligent_agent_with_vertex_ai(
     vertex_ai
 ) -> Dict[str, Any]:
     """
-    ðŸ§  Vertex AI Gemini-powered conversational agent
+    🧠 Vertex AI Gemini-powered conversational agent
     Understands intent and decides actions
     """
     try:
@@ -272,15 +273,15 @@ Response:
                         intent_data.setdefault('response', response_text)
                         intent_data.setdefault('suggested_actions', [])
                         
-                        logger.info(f"ðŸ§  Agent: {intent_data['intent']} | Discovery: {intent_data['needs_discovery']}")
+                        logger.info(f"🧠 Agent: {intent_data['intent']} | Discovery: {intent_data['needs_discovery']}")
                         
                         return intent_data
             
-            logger.error(f"âŒ Vertex AI API error: {response.status_code}")
+            logger.error(f"❌ Vertex AI API error: {response.status_code}")
             raise Exception(f"API error: {response.status_code}")
     
     except Exception as e:
-        logger.error(f"âŒ Vertex AI agent failed: {e}")
+        logger.error(f"❌ Vertex AI agent failed: {e}")
         
         # Fallback: simple keyword detection
         search_keywords = ['find', 'search', 'papers', 'research', 'studies', 'discover', 'show me', 'look for']
@@ -330,7 +331,7 @@ async def _parallel_translate_query(query: str) -> Dict[str, str]:
             'pt': 'Portuguese'
         }
         
-        logger.info(f"ðŸŒ Translating to {len(target_languages)} languages...")
+        logger.info(f"🌍 Translating to {len(target_languages)} languages...")
         start = time.time()
         
         async def translate_one(lang_code: str, lang_name: str) -> tuple:
@@ -341,10 +342,10 @@ async def _parallel_translate_query(query: str) -> Dict[str, str]:
                 loop = asyncio.get_event_loop()
                 translator = GoogleTranslator(source='auto', target=lang_code)
                 translated = await loop.run_in_executor(None, translator.translate, query)
-                logger.info(f"   âœ… {lang_code}: '{translated}'")
+                logger.info(f"   ✅ {lang_code}: '{translated}'")
                 return (lang_code, translated)
             except Exception as e:
-                logger.warning(f"   âš ï¸  {lang_code} failed: {e}")
+                logger.warning(f"   ⚠️ {lang_code} failed: {e}")
                 return (lang_code, query)
         
         tasks = [translate_one(code, name) for code, name in target_languages.items()]
@@ -353,11 +354,11 @@ async def _parallel_translate_query(query: str) -> Dict[str, str]:
         translations = dict(results)
         elapsed = time.time() - start
         
-        logger.info(f"âœ… Translation done in {elapsed:.1f}s")
+        logger.info(f"✅ Translation done in {elapsed:.1f}s")
         return translations
         
     except Exception as e:
-        logger.error(f"âŒ Translation failed: {e}")
+        logger.error(f"❌ Translation failed: {e}")
         return {'en': query}
 
 
@@ -371,17 +372,17 @@ async def _parallel_fetch_papers(
     max_results_per_lang: int = 10
 ) -> List[Dict]:
     """Fetch papers from APIs in parallel"""
-    logger.info(f"ðŸ” Fetching papers from APIs...")
+    logger.info(f"📚 Fetching papers from APIs...")
     start = time.time()
     
     async def fetch_english(query: str) -> List[Dict]:
         try:
             logger.info(f"   EN: '{query}'")
             papers = await api_client.search_all_apis(query=query, max_results=max_results_per_lang)
-            logger.info(f"      âœ… EN: {len(papers)} papers")
+            logger.info(f"      ✅ EN: {len(papers)} papers")
             return papers
         except Exception as e:
-            logger.warning(f"      âš ï¸  EN failed: {e}")
+            logger.warning(f"      ⚠️ EN failed: {e}")
             return []
     
     async def fetch_other_lang(lang_code: str, query: str) -> List[Dict]:
@@ -391,10 +392,10 @@ async def _parallel_fetch_papers(
         try:
             logger.info(f"   {lang_code.upper()}: '{query}'")
             papers = await api_client.search_all_apis(query=query, max_results=max_results_per_lang // 2)
-            logger.info(f"      âœ… {lang_code.upper()}: {len(papers)} papers")
+            logger.info(f"      ✅ {lang_code.upper()}: {len(papers)} papers")
             return papers
         except Exception as e:
-            logger.warning(f"      âš ï¸  {lang_code.upper()} failed: {e}")
+            logger.warning(f"      ⚠️ {lang_code.upper()} failed: {e}")
             return []
     
     # Create tasks
@@ -422,7 +423,7 @@ async def _parallel_fetch_papers(
             unique_papers.append(paper)
     
     elapsed = time.time() - start
-    logger.info(f"âœ… Fetch done in {elapsed:.1f}s: {len(unique_papers)} papers")
+    logger.info(f"✅ Fetch done in {elapsed:.1f}s: {len(unique_papers)} papers")
     
     return unique_papers
 
@@ -438,7 +439,7 @@ async def _parallel_index_papers(
     batch_size: int = 10
 ) -> int:
     """Index papers to Elasticsearch with embeddings in parallel"""
-    logger.info(f"ðŸ’¾ Indexing {len(papers)} papers...")
+    logger.info(f"💾 Indexing {len(papers)} papers...")
     start = time.time()
     
     async def index_batch(batch: List[Dict], batch_num: int) -> int:
@@ -463,12 +464,12 @@ async def _parallel_index_papers(
                 except Exception as e:
                     logger.warning(f"      Index failed: {e}")
         
-        logger.info(f"   âœ… Batch {batch_num}: {indexed}/{len(batch)} indexed")
+        logger.info(f"   ✅ Batch {batch_num}: {indexed}/{len(batch)} indexed")
         return indexed
     
     # Split into batches
     batches = [papers[i:i + batch_size] for i in range(0, len(papers), batch_size)]
-    logger.info(f"   ðŸ“¦ {len(batches)} batches of {batch_size}")
+    logger.info(f"   📦 {len(batches)} batches of {batch_size}")
     
     # Index in parallel
     batch_tasks = [index_batch(batch, i + 1) for i, batch in enumerate(batches)]
@@ -477,7 +478,7 @@ async def _parallel_index_papers(
     total_indexed = sum(results)
     elapsed = time.time() - start
     
-    logger.info(f"âœ… Indexing done in {elapsed:.1f}s: {total_indexed}/{len(papers)} indexed")
+    logger.info(f"✅ Indexing done in {elapsed:.1f}s: {total_indexed}/{len(papers)} indexed")
     
     return total_indexed
 
@@ -493,7 +494,7 @@ async def _true_multilingual_search(
     limit: int
 ) -> List[Dict]:
     """
-    âœ… OPTIMIZED hybrid search using KNN (FAST!)
+    ✅ OPTIMIZED hybrid search using KNN (FAST!)
     Replaces slow script_score with native KNN
     """
     try:
@@ -501,14 +502,14 @@ async def _true_multilingual_search(
         if query_vector and len(query_vector) == 768:
             search_body = {
                 "size": limit,
-                "knn": {  # âœ… Native KNN - FAST!
+                "knn": {  # ✅ Native KNN - FAST!
                     "field": "content_embedding",
                     "query_vector": query_vector,
                     "k": limit,
                     "num_candidates": min(limit * 3, 100),
                     "boost": 1.0
                 },
-                "query": {  # âœ… Text search runs in parallel
+                "query": {  # ✅ Text search runs in parallel
                     "multi_match": {
                         "query": query,
                         "fields": ["title^3", "abstract^2"],
@@ -544,7 +545,7 @@ async def _true_multilingual_search(
                 "timeout": "10s"
             }
         
-        logger.info(f"   ðŸ” Executing {'KNN+text hybrid' if query_vector else 'text-only'} search...")
+        logger.info(f"   🔍 Executing {'KNN+text hybrid' if query_vector else 'text-only'} search...")
         
         response = await elastic_client.async_client.search(
             index=elastic_client.index_name,
@@ -559,12 +560,12 @@ async def _true_multilingual_search(
             paper['search_score'] = hit['_score']
             papers.append(paper)
         
-        logger.info(f"âœ… Search returned {len(papers)} papers in {response.get('took', 0)}ms")
+        logger.info(f"✅ Search returned {len(papers)} papers in {response.get('took', 0)}ms")
         
         return papers
         
     except Exception as e:
-        logger.error(f"âŒ Search failed: {e}")
+        logger.error(f"❌ Search failed: {e}")
         import traceback
         traceback.print_exc()
         return []
@@ -581,10 +582,10 @@ async def _calculate_similarity_edges(
 ) -> tuple:
     """Calculate similarity edges between top papers"""
     if len(papers) <= 1:
-        logger.warning("âš ï¸  Not enough papers for edges")
+        logger.warning("⚠️ Not enough papers for edges")
         return papers, []
     
-    logger.info(f"ðŸ”— Calculating edges (threshold: {min_similarity*100}%)...")
+    logger.info(f"🔗 Calculating edges (threshold: {min_similarity*100}%)...")
     start = time.time()
     
     # Sort by relevance
@@ -594,7 +595,7 @@ async def _calculate_similarity_edges(
         reverse=True
     )[:top_n]
     
-    logger.info(f"   ðŸ“Š Top {len(sorted_papers)} papers")
+    logger.info(f"   📊 Top {len(sorted_papers)} papers")
     
     edges = []
     calculations = 0
@@ -633,12 +634,12 @@ async def _calculate_similarity_edges(
                     })
             
             except Exception as e:
-                logger.warning(f"      âš ï¸  Similarity calculation failed: {e}")
+                logger.warning(f"      ⚠️ Similarity calculation failed: {e}")
                 continue
     
     elapsed = time.time() - start
     
-    logger.info(f"âœ… Edges done in {elapsed:.2f}s: {len(edges)} edges from {calculations} comparisons")
+    logger.info(f"✅ Edges done in {elapsed:.2f}s: {len(edges)} edges from {calculations} comparisons")
     
     return sorted_papers, edges
 
@@ -651,7 +652,7 @@ async def _calculate_similarity_edges(
 async def lifespan(app: FastAPI):
     """Application startup and shutdown"""
     logger.info("=" * 80)
-    logger.info("ðŸ¤– CONVERSATIONAL RESEARCH DISCOVERY + RAG")
+    logger.info("🤖 CONVERSATIONAL RESEARCH DISCOVERY + RAG")
     logger.info("=" * 80)
     
     # Initialize state
@@ -666,27 +667,27 @@ async def lifespan(app: FastAPI):
             # Elasticsearch
             elastic = ElasticClient()
             await elastic.test_connection()
-            logger.info("   âœ… Elasticsearch: Ready (with RAG support)")
+            logger.info("   ✅ Elasticsearch: Ready (with RAG support)")
             
             # Vertex AI
             vertex_ai = VertexAIProcessor()
             await vertex_ai.test_connection()
-            logger.info("   âœ… Vertex AI: Ready (Gemini + Embeddings)")
+            logger.info("   ✅ Vertex AI: Ready (Gemini + Embeddings)")
             
             # Hybrid Search
             hybrid_search = HybridSearchEngine(elastic, vertex_ai)
-            logger.info("   âœ… Hybrid Search: Ready")
+            logger.info("   ✅ Hybrid Search: Ready")
             
             # Graph Builder
             graph_builder = EnhancedIntelligentGraphBuilder()
-            logger.info("   âœ… Graph Builder: Ready")
+            logger.info("   ✅ Graph Builder: Ready")
             
             # API Client
             api_client = ResearchPaperAPIsClient()
-            logger.info("   âœ… Research APIs: Ready")
+            logger.info("   ✅ Research APIs: Ready")
             
             if TRANSLATION_AVAILABLE:
-                logger.info("   âœ… Translation: Ready")
+                logger.info("   ✅ Translation: Ready")
             
             # Set state
             app.state.elastic = elastic
@@ -696,13 +697,13 @@ async def lifespan(app: FastAPI):
             app.state.api_client = api_client
         
         logger.info("=" * 80)
-        logger.info("ðŸš€ SYSTEM READY - ALL FEATURES ENABLED")
+        logger.info("🚀 SYSTEM READY - ALL FEATURES ENABLED")
         logger.info("=" * 80)
         
         yield
         
     except Exception as e:
-        logger.error(f"âŒ Initialization failed: {e}")
+        logger.error(f"❌ Initialization failed: {e}")
         yield
     
     finally:
@@ -713,7 +714,7 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI app
 app = FastAPI(
-    title="ðŸ¤– Conversational Research Discovery + RAG",
+    title="🤖 Conversational Research Discovery + RAG",
     description="Elastic + Google Cloud - Multilingual research with RAG",
     version="7.0.0-RAG",
     lifespan=lifespan
@@ -774,7 +775,7 @@ Real-time monitoring, save/delete papers, activity tracking
 
 # ============= MODELS =============
 
-class SavePaperRequest(BaseModel):
+class SavePaperCloudRequest(BaseModel):
     id: str
     title: str
     authors: Optional[str] = None
@@ -790,7 +791,7 @@ class SavePaperRequest(BaseModel):
 async def get_cloud_stats():
     """Get real-time cloud storage statistics - SERVERLESS COMPATIBLE"""
     try:
-        logger.info("ðŸ“Š Fetching cloud statistics")
+        logger.info("📊 Fetching cloud statistics")
         
         # Get total papers count
         total_papers = es.count(index=ES_INDEX)['count']
@@ -826,12 +827,12 @@ async def get_cloud_stats():
             "vertexAIStatus": "online" if hasattr(app.state, 'vertexai') else "offline"
         }
         
-        logger.info(f"âœ… Cloud stats: {total_papers} papers, {saved_papers} saved")
+        logger.info(f"✅ Cloud stats: {total_papers} papers, {saved_papers} saved")
         
         return {"success": True, "stats": stats_data}
         
     except Exception as e:
-        logger.error(f"âŒ Error fetching cloud stats: {str(e)}")
+        logger.error(f"❌ Error fetching cloud stats: {str(e)}")
         return {
             "success": True,
             "stats": {
@@ -848,11 +849,11 @@ async def get_cloud_stats():
 
 @app.post("/api/cloud/save")
 @auto_translate 
-async def save_paper_to_cloud(request: SavePaperRequest):
+async def save_paper_to_cloud(request: SavePaperCloudRequest):
     """Save a paper to cloud storage"""
     try:
         paper_id = request.id
-        logger.info(f"ðŸ’¾ Saving paper to cloud: {paper_id}")
+        logger.info(f"💾 Saving paper to cloud: {paper_id}")
         
         paper_data = {
             "id": paper_id,
@@ -875,10 +876,10 @@ async def save_paper_to_cloud(request: SavePaperRequest):
                 id=paper_id,
                 body={"doc": {"saved_at": paper_data["saved_at"], "saved_to_cloud": True}}
             )
-            logger.info(f"âœ… Updated existing paper: {paper_id}")
+            logger.info(f"✅ Updated existing paper: {paper_id}")
         except:
             es.index(index=ES_INDEX, id=paper_id, document=paper_data)
-            logger.info(f"âœ… Created new paper: {paper_id}")
+            logger.info(f"✅ Created new paper: {paper_id}")
         
         return {
             "success": True,
@@ -888,7 +889,7 @@ async def save_paper_to_cloud(request: SavePaperRequest):
         }
         
     except Exception as e:
-        logger.error(f"âŒ Error saving paper: {str(e)}")
+        logger.error(f"❌ Error saving paper: {str(e)}")
         return {"success": False, "error": str(e)}
 
 # ============= 3. DELETE PAPER =============
@@ -898,7 +899,7 @@ async def save_paper_to_cloud(request: SavePaperRequest):
 async def delete_paper_from_cloud(paper_id: str):
     """Delete a paper from cloud storage"""
     try:
-        logger.info(f"ðŸ—‘ï¸ Deleting paper from cloud: {paper_id}")
+        logger.info(f"🗑️ Deleting paper from cloud: {paper_id}")
         
         # Remove saved_at flag (keep paper in index)
         es.update(
@@ -911,7 +912,7 @@ async def delete_paper_from_cloud(paper_id: str):
             }
         )
         
-        logger.info(f"âœ… Deleted paper: {paper_id}")
+        logger.info(f"✅ Deleted paper: {paper_id}")
         
         return {
             "success": True,
@@ -920,14 +921,14 @@ async def delete_paper_from_cloud(paper_id: str):
         }
         
     except Exception as e:
-        logger.error(f"âŒ Error deleting paper: {str(e)}")
+        logger.error(f"❌ Error deleting paper: {str(e)}")
         return {"success": False, "error": str(e)}
 
 @app.get("/api/cloud/papers")
 async def get_saved_papers(limit: int = 20, offset: int = 0):
     """Get list of all saved papers with full details"""
     try:
-        logger.info(f"ðŸ“„ Fetching saved papers (limit={limit}, offset={offset})")
+        logger.info(f"📄 Fetching saved papers (limit={limit}, offset={offset})")
         
         result = es.search(
             index=ES_INDEX,
@@ -947,7 +948,7 @@ async def get_saved_papers(limit: int = 20, offset: int = 0):
         
         total = result['hits']['total']['value']
         
-        logger.info(f"âœ… Retrieved {len(papers)} saved papers (total: {total})")
+        logger.info(f"✅ Retrieved {len(papers)} saved papers (total: {total})")
         
         return {
             "success": True,
@@ -958,7 +959,7 @@ async def get_saved_papers(limit: int = 20, offset: int = 0):
         }
         
     except Exception as e:
-        logger.error(f"âŒ Error fetching saved papers: {str(e)}")
+        logger.error(f"❌ Error fetching saved papers: {str(e)}")
         return {
             "success": False,
             "error": str(e),
@@ -972,12 +973,12 @@ async def get_saved_papers(limit: int = 20, offset: int = 0):
 async def get_all_papers(limit: int = 50, offset: int = 0):
     """Get ALL papers in cloud storage (not just saved ones)"""
     try:
-        logger.info(f"ðŸ“„ Fetching all papers (limit={limit}, offset={offset})")
+        logger.info(f"📄 Fetching all papers (limit={limit}, offset={offset})")
         
         result = es.search(
             index=ES_INDEX,
             body={
-                "query": {"match_all": {}},  # â† Get ALL papers
+                "query": {"match_all": {}},  # ← Get ALL papers
                 "sort": [{"indexed_at": {"order": "desc"}}],
                 "from": offset,
                 "size": limit
@@ -994,7 +995,7 @@ async def get_all_papers(limit: int = 50, offset: int = 0):
         
         total = result['hits']['total']['value']
         
-        logger.info(f"âœ… Retrieved {len(papers)} papers (total: {total})")
+        logger.info(f"✅ Retrieved {len(papers)} papers (total: {total})")
         
         return {
             "success": True,
@@ -1005,7 +1006,7 @@ async def get_all_papers(limit: int = 50, offset: int = 0):
         }
         
     except Exception as e:
-        logger.error(f"âŒ Error fetching all papers: {str(e)}")
+        logger.error(f"❌ Error fetching all papers: {str(e)}")
         return {
             "success": False,
             "error": str(e),
@@ -1014,33 +1015,21 @@ async def get_all_papers(limit: int = 50, offset: int = 0):
         }
 
 # ============================================================================
-# ðŸ’¬ CONVERSATIONAL CHAT ENDPOINT
+# 💬 CONVERSATIONAL CHAT ENDPOINT
 # ============================================================================
 
-# âœ… Make sure this is imported!
-from pydantic import BaseModel
-
-# Your Pydantic model
-class ConversationRequest(BaseModel):
-    message: str
-    conversation_history: list = []
-    session_id: str = None
-
-# âœ…âœ…âœ… CRITICAL: Add `http_request: Request` as FIRST parameter!
 @app.post("/api/chat")
-@auto_translate  # Decorator
+@auto_translate
 async def chat(
-    http_request: Request,  # âœ…âœ…âœ… THIS IS CRITICAL - ADD THIS LINE!
-    request: ConversationRequest  # Your existing Pydantic model
+    http_request: Request,
+    request: ConversationRequest
 ):
     """
-    ðŸ’¬ Conversational research assistant powered by Vertex AI Gemini
+    💬 Conversational research assistant powered by Vertex AI Gemini
     """
     try:
         logger.info("=" * 80)
-        logger.info(f"ðŸ’¬ USER: {request.message}")
-        logger.info(f"ðŸ” DEBUG: http_request type = {type(http_request)}")
-        logger.info(f"ðŸ” DEBUG: request type = {type(request)}")
+        logger.info(f"💬 USER: {request.message}")
         logger.info("=" * 80)
         
         start_time = time.time()
@@ -1053,7 +1042,7 @@ async def chat(
             }
         
         # Step 1: Vertex AI Gemini Agent
-        logger.info("ðŸ§  STEP 1: Vertex AI Gemini Agent Decision...")
+        logger.info("🧠 STEP 1: Vertex AI Gemini Agent Decision...")
         agent_decision = await _intelligent_agent_with_vertex_ai(
             request.message,
             request.conversation_history,
@@ -1068,7 +1057,7 @@ async def chat(
         edges = []
         
         if agent_decision.get('needs_discovery') and agent_decision['intent'] == 'search':
-            logger.info("ðŸ” STEP 2: Discovering Papers...")
+            logger.info("🔍 STEP 2: Discovering Papers...")
             
             # Translate query
             translations = await _parallel_translate_query(agent_decision['query'])
@@ -1087,10 +1076,10 @@ async def chat(
                 app.state.elastic
             )
             
-            logger.info(f"   ðŸ“Š Indexed: {indexed_count} papers")
+            logger.info(f"   📊 Indexed: {indexed_count} papers")
             
             # Search Elasticsearch
-            logger.info("ðŸ” STEP 3: Searching Elasticsearch...")
+            logger.info("🔍 STEP 3: Searching Elasticsearch...")
             query_vector = await app.state.vertexai.generate_embedding(
                 agent_decision['query'],
                 task_type="RETRIEVAL_QUERY"
@@ -1104,19 +1093,19 @@ async def chat(
             )
             
             # Calculate edges
-            logger.info("ðŸ”— STEP 4: Calculating Edges...")
+            logger.info("🔗 STEP 4: Calculating Edges...")
             papers, edges = await _calculate_similarity_edges(
                 all_papers,
                 top_n=20,
                 min_similarity=0.70
             )
             
-            logger.info(f"   ðŸ“Š Returning {len(papers)} papers with {len(edges)} edges")
+            logger.info(f"   📊 Returning {len(papers)} papers with {len(edges)} edges")
         
         elapsed = time.time() - start_time
         
         logger.info("=" * 80)
-        logger.info(f"âœ… COMPLETED in {elapsed:.2f}s")
+        logger.info(f"✅ COMPLETED in {elapsed:.2f}s")
         logger.info("=" * 80)
         
         return {
@@ -1133,7 +1122,7 @@ async def chat(
         }
         
     except Exception as e:
-        logger.error(f"âŒ Chat failed: {e}")
+        logger.error(f"❌ Chat failed: {e}")
         import traceback
         traceback.print_exc()
         return {
@@ -1144,17 +1133,17 @@ async def chat(
 
 
 # ============================================================================
-# ðŸ“š RESEARCH ENDPOINTS
+# 📚 RESEARCH ENDPOINTS
 # ============================================================================
 
 @app.post("/api/research/discover")
 @auto_translate 
 async def discover_multilingual(request: MultilingualResearchRequest):
     """
-    ðŸ“š Multilingual research discovery
+    📚 Multilingual research discovery
     """
     try:
-        logger.info(f"ðŸ” DISCOVER: {request.query}")
+        logger.info(f"🔍 DISCOVER: {request.query}")
         start_time = time.time()
         
         if not app.state.elastic or not app.state.vertexai:
@@ -1212,29 +1201,27 @@ async def discover_multilingual(request: MultilingualResearchRequest):
         }
         
     except Exception as e:
-        logger.error(f"âŒ Discover failed: {e}")
+        logger.error(f"❌ Discover failed: {e}")
         return {"success": False, "error": str(e)}
 
-
-from fastapi import Request  # âœ… Make sure this is imported
 
 @app.post("/api/research/find-similar")
 @auto_translate 
 async def find_similar(
-    http_request: Request,  # âœ… ADD THIS LINE!
+    http_request: Request,
     request: FindSimilarRequest
 ):
     """
-    ðŸ”— Find similar papers using vector similarity
-    âœ… Supports automatic translation to any language
+    🔗 Find similar papers using vector similarity
+    ✅ Supports automatic translation to any language
     """
     try:
-        logger.info(f"ðŸ” Finding similar papers for {request.paper_id}")
+        logger.info(f"🔍 Finding similar papers for {request.paper_id}")
         
         if not app.state.elastic:
             return {"success": False, "error": "System not initialized"}
         
-        # âœ… FIX: Explicitly fetch paper WITH embedding
+        # ✅ FIX: Explicitly fetch paper WITH embedding
         try:
             paper_response = await app.state.elastic.async_client.get(
                 index=app.state.elastic.index_name,
@@ -1249,10 +1236,10 @@ async def find_similar(
             paper = paper_response["_source"]
             paper['id'] = request.paper_id
             
-            logger.info(f"   ðŸ“„ Paper fetched: {paper.get('title', 'Unknown')[:50]}")
+            logger.info(f"   📄 Paper fetched: {paper.get('title', 'Unknown')[:50]}")
             
         except Exception as e:
-            logger.error(f"âŒ Paper not found: {request.paper_id} - {e}")
+            logger.error(f"❌ Paper not found: {request.paper_id} - {e}")
             return {
                 "success": False,
                 "error": f"Paper not found: {request.paper_id}"
@@ -1262,13 +1249,13 @@ async def find_similar(
         embedding = paper.get('content_embedding')
         
         if not embedding or not isinstance(embedding, list) or len(embedding) == 0:
-            logger.error(f"âŒ No valid embedding for {request.paper_id}")
+            logger.error(f"❌ No valid embedding for {request.paper_id}")
             return {
                 "success": False,
                 "error": "No embedding available for this paper. Try papers with abstracts."
             }
         
-        logger.info(f"   âœ… Embedding found: {len(embedding)} dimensions")
+        logger.info(f"   ✅ Embedding found: {len(embedding)} dimensions")
         
         # Find similar papers using vector search
         similar_papers = await app.state.elastic.vector_search(
@@ -1283,7 +1270,7 @@ async def find_similar(
             if p.get('id') != request.paper_id
         ][:request.max_results]
         
-        logger.info(f"âœ… Found {len(similar_papers)} similar papers")
+        logger.info(f"✅ Found {len(similar_papers)} similar papers")
         
         # Build relationships (edges) for frontend
         relationships = []
@@ -1309,19 +1296,18 @@ async def find_similar(
                     'width': similarity * 5
                 })
         
-        logger.info(f"âœ… Created {len(relationships)} relationships")
+        logger.info(f"✅ Created {len(relationships)} relationships")
         
-        # âœ… This return will be automatically translated by @auto_translate!
         return {
             "success": True,
-            "source_paper": paper,  # âœ… Will be translated
-            "similar_papers": similar_papers,  # âœ… Will be translated
+            "source_paper": paper,
+            "similar_papers": similar_papers,
             "relationships": relationships,
             "total_similar": len(similar_papers)
         }
         
     except Exception as e:
-        logger.error(f"âŒ Find similar failed: {e}")
+        logger.error(f"❌ Find similar failed: {e}")
         import traceback
         traceback.print_exc()
         return {
@@ -1330,8 +1316,9 @@ async def find_similar(
         }
 
 @app.post("/api/paper/summarize")
+@auto_translate
 async def summarize_paper(
-    http_request: Request,  # ✅ Add this to get HTTP headers
+    http_request: Request,
     request: PaperSummarizeRequest
 ):
     """
@@ -1345,7 +1332,7 @@ async def summarize_paper(
         # Get user's language from Accept-Language header
         user_language = http_request.headers.get('accept-language', 'en')
         
-        # Extract primary language code (e.g., 'zh-CN' -> 'zh')
+        # Extract primary language code
         if ',' in user_language:
             user_language = user_language.split(',')[0]
         if '-' in user_language:
@@ -1404,7 +1391,6 @@ async def summarize_paper(
         
         target_language = language_names.get(user_language, 'English')
         
-        # ✅ MULTILINGUAL PROMPT
         prompt = f"""You are a research paper summarization expert with multilingual capabilities.
 
 **Paper Title**: {title}
@@ -1432,15 +1418,6 @@ async def summarize_paper(
             if not summary or len(summary.strip()) < 50:
                 logger.error(f"❌ Generated summary too short: {len(summary)} chars")
                 raise Exception("Generated summary is too short or empty")
-            
-            # Check truncation
-            if summary.strip().endswith(('*', '•', '-', ':', ',')):
-                logger.warning("⚠️ Summary might be truncated, retrying...")
-                summary = await app.state.vertexai.generate_text(
-                    prompt=prompt,
-                    max_tokens=2000,
-                    temperature=0.7
-                )
             
             logger.info(f"✅ Summary generated in {user_language} ({len(summary)} chars)")
             
@@ -1476,13 +1453,11 @@ async def summarize_paper(
         }
 
 
-
-
 @app.post("/api/paper/ask")
 @auto_translate 
 async def ask_paper(request: PaperQuestionRequest):
     """
-    â“ Ask question about paper
+    ❓ Ask question about paper
     """
     try:
         if not app.state.elastic or not app.state.vertexai:
@@ -1521,19 +1496,19 @@ Provide a clear, concise answer based only on the paper information above."""
         }
         
     except Exception as e:
-        logger.error(f"âŒ Ask failed: {e}")
+        logger.error(f"❌ Ask failed: {e}")
         return {"success": False, "error": str(e)}
 
 
 # ============================================================================
-# ðŸ’¾ USER LIBRARY ENDPOINTS (NEW!)
+# 💾 USER LIBRARY ENDPOINTS
 # ============================================================================
 
 @app.post("/api/library/save")
 @auto_translate 
 async def save_paper_to_library(request: SavePaperRequest):
     """
-    ðŸ’¾ Save paper to user's personal library
+    💾 Save paper to user's personal library
     """
     try:
         if not app.state.elastic or not app.state.vertexai:
@@ -1559,7 +1534,7 @@ async def save_paper_to_library(request: SavePaperRequest):
         )
         
         if success:
-            logger.info(f"ðŸ’¾ Saved paper {request.paper_id} for user {request.user_id}")
+            logger.info(f"💾 Saved paper {request.paper_id} for user {request.user_id}")
             return {
                 "success": True,
                 "message": "Paper saved to your library",
@@ -1570,7 +1545,7 @@ async def save_paper_to_library(request: SavePaperRequest):
             return {"success": False, "error": "Failed to save paper"}
         
     except Exception as e:
-        logger.error(f"âŒ Save failed: {e}")
+        logger.error(f"❌ Save failed: {e}")
         import traceback
         traceback.print_exc()
         return {"success": False, "error": str(e)}
@@ -1580,7 +1555,7 @@ async def save_paper_to_library(request: SavePaperRequest):
 @auto_translate 
 async def get_user_library(user_id: str, page: int = 1, size: int = 20):
     """
-    ðŸ“š Get user's saved papers
+    📚 Get user's saved papers
     """
     try:
         if not app.state.elastic:
@@ -1619,7 +1594,7 @@ async def get_user_library(user_id: str, page: int = 1, size: int = 20):
         }
         
     except Exception as e:
-        logger.error(f"âŒ Library fetch failed: {e}")
+        logger.error(f"❌ Library fetch failed: {e}")
         return {"success": False, "error": str(e)}
 
 @app.post("/api/rag/query")
@@ -1630,7 +1605,7 @@ async def rag_query_user_library(
 ):
     """
     🤖 Multi-Paper RAG: Search papers + Generate answer with Gemini
-    ✅ Uses Google Cloud Gemini API (gemini-2.5-flash-lite)
+    ✅ Uses Google Cloud Gemini API
     ✅ Supports automatic translation
     """
     try:
@@ -1708,11 +1683,9 @@ async def rag_query_user_library(
 
 **ANSWER:**"""
 
-        # ✅ USE EXACT GOOGLE CLOUD ENDPOINT (from your curl example)
         api_key = os.getenv("GOOGLE_API_KEY")
-        gemini_model = "gemini-2.5-flash-lite"  # ✅ Available model
+        gemini_model = "gemini-2.5-flash-lite"
         
-        # ✅ Exact endpoint from your curl command
         endpoint = f"https://aiplatform.googleapis.com/v1/publishers/google/models/{gemini_model}:generateContent?key={api_key}"
         
         payload = {
@@ -1773,7 +1746,6 @@ async def rag_query_user_library(
         return {"success": False, "error": str(e)}
 
 
-
 # ============================================================================
 # RUN SERVER
 # ============================================================================
@@ -1786,6 +1758,3 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
-
-
-
