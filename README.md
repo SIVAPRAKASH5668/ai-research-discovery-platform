@@ -467,13 +467,9 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 **Challenge:** Build the Future of AI-Powered Search
 
-**Team:** [Your Team Name]
+**Team:** Research_Graph
 
-**Demo:** [Live Demo URL]
-
-**Video:** [YouTube Demo Link]
-
-**Submission Date:** [Date]
+**Demo:** https://ai-research-discovery-platform-kkjj.vercel.app/
 
 ---
 
