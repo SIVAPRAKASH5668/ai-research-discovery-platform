@@ -39,7 +39,7 @@
 - **Sub-200ms Query Latency** - Distributed Elasticsearch architecture
 
 ### 🤖 Google Cloud Conversational AI
-- **Gemini 2.5 Flash Lite ** - Natural language understanding with 128K context window
+- **Gemini 2.5 Flash Lite** - Natural language understanding with 128K context window
 - **Vertex AI Embeddings** - Multilingual semantic vectors for cross-language discovery
 - **RAG Architecture** - Zero-hallucination guarantee with citation validation
 - **Multi-turn Dialogue** - Context-aware conversation memory
@@ -69,7 +69,7 @@
 ### Search & AI
 - **Elasticsearch Cloud** - Distributed hybrid search engine (BM25 + kNN)
 - **Google Cloud Vertex AI** - Multilingual embeddings and translation
-- **Google Gemini 2.5 Flash-lite ** - Conversational AI with RAG
+- **Google Gemini 2.5 Flash-lite** - Conversational AI with RAG
 - **Sentence Transformers** - Embedding model integration
 
 ### Frontend
