@@ -1025,7 +1025,7 @@ async def chat(
     request: ConversationRequest
 ):
     """
-    💬 Conversational research assistant powered by Vertex AI Gemini
+    💬 Conversational research assistant - SIMPLIFIED FOR DIRECT SEARCH
     """
     try:
         logger.info("=" * 80)
@@ -1037,70 +1037,52 @@ async def chat(
         if not app.state.vertexai or not app.state.elastic:
             return {
                 "success": False,
-                "error": "System not initialized",
-                "agent_response": "I'm currently unavailable. Please try again later."
+                "error": "System not initialized"
             }
         
-        # Step 1: Vertex AI Gemini Agent
-        logger.info("🧠 STEP 1: Vertex AI Gemini Agent Decision...")
-        agent_decision = await _intelligent_agent_with_vertex_ai(
-            request.message,
-            request.conversation_history,
-            app.state.vertexai
+        # ✅ SKIP GEMINI INTENT ANALYSIS - JUST SEARCH DIRECTLY
+        logger.info("🔍 Direct search (no intent analysis)...")
+        
+        query = request.message.strip()
+        
+        # Translate query
+        translations = await _parallel_translate_query(query)
+        
+        # Fetch from APIs (optional - set to False if you just want ES search)
+        fetched_papers = await _parallel_fetch_papers(
+            translations,
+            app.state.api_client,
+            max_results_per_lang=10
         )
         
-        logger.info(f"   Intent: {agent_decision['intent']}")
-        logger.info(f"   Discovery needed: {agent_decision['needs_discovery']}")
+        # Index to Elasticsearch
+        indexed_count = await _parallel_index_papers(
+            fetched_papers,
+            app.state.vertexai,
+            app.state.elastic
+        )
         
-        # Step 2: If search intent, discover papers
-        papers = []
-        edges = []
+        logger.info(f"   📊 Indexed: {indexed_count} papers")
         
-        if agent_decision.get('needs_discovery') and agent_decision['intent'] == 'search':
-            logger.info("🔍 STEP 2: Discovering Papers...")
-            
-            # Translate query
-            translations = await _parallel_translate_query(agent_decision['query'])
-            
-            # Fetch from APIs
-            fetched_papers = await _parallel_fetch_papers(
-                translations,
-                app.state.api_client,
-                max_results_per_lang=10
-            )
-            
-            # Index to Elasticsearch
-            indexed_count = await _parallel_index_papers(
-                fetched_papers,
-                app.state.vertexai,
-                app.state.elastic
-            )
-            
-            logger.info(f"   📊 Indexed: {indexed_count} papers")
-            
-            # Search Elasticsearch
-            logger.info("🔍 STEP 3: Searching Elasticsearch...")
-            query_vector = await app.state.vertexai.generate_embedding(
-                agent_decision['query'],
-                task_type="RETRIEVAL_QUERY"
-            )
-            
-            all_papers = await _true_multilingual_search(
-                app.state.elastic,
-                agent_decision['query'],
-                query_vector,
-                limit=50
-            )
-            
-            # Calculate edges
-            logger.info("🔗 STEP 4: Calculating Edges...")
-            papers, edges = await _calculate_similarity_edges(
-                all_papers,
-                top_n=20,
-                min_similarity=0.70
-            )
-            
-            logger.info(f"   📊 Returning {len(papers)} papers with {len(edges)} edges")
+        # Search Elasticsearch with vector
+        query_vector = await app.state.vertexai.generate_embedding(
+            query,
+            task_type="RETRIEVAL_QUERY"
+        )
+        
+        all_papers = await _true_multilingual_search(
+            app.state.elastic,
+            query,
+            query_vector,
+            limit=50
+        )
+        
+        # Calculate edges
+        papers, edges = await _calculate_similarity_edges(
+            all_papers,
+            top_n=20,
+            min_similarity=0.70
+        )
         
         elapsed = time.time() - start_time
         
@@ -1110,13 +1092,13 @@ async def chat(
         
         return {
             "success": True,
-            "agent_response": agent_decision.get('response', ''),
-            "intent": agent_decision.get('intent'),
+            "agent_response": f"Found {len(papers)} papers related to '{query}'",
+            "intent": "search",
             "papers": papers,
             "edges": edges,
             "total_papers": len(papers),
             "total_edges": len(edges),
-            "suggested_actions": agent_decision.get('suggested_actions', []),
+            "suggested_actions": [],
             "processing_time": elapsed,
             "session_id": request.session_id
         }
@@ -1130,6 +1112,7 @@ async def chat(
             "error": str(e),
             "agent_response": "I encountered an error. Please try again."
         }
+
 
 
 # ============================================================================
@@ -1758,3 +1741,4 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
+
