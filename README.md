@@ -132,10 +132,10 @@ GOOGLE_CLOUD_PROJECT_ID=your-project-id
 GOOGLE_CLOUD_API_KEY=your-vertex-ai-key
 ELASTICSEARCH_CLOUD_ID=your-cluster-id
 ELASTICSEARCH_API_KEY=your-api-key
-CROSSREF_EMAIL=your-email@example.com
-SEMANTIC_SCHOLAR_API_KEY=optional-but-recommended
-PUBMED_API_KEY=optional-for-higher-rate-limits
-EUROPEPMC_EMAIL=your-email@example.com
+CROSSREF_EMAIL=common endpoint (free)
+SEMANTIC_SCHOLAR_API_KEY=common endpoint (free)
+PUBMED_API_KEY=common endpoint (free)
+EUROPEPMC_EMAIL=common endpoint (free)
 ENVIRONMENT=development
 EOF
 ```
